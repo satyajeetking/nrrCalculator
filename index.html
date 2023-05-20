@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Current NRR Calculation</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<style>
+    body {
+        font-size: 15px !important;
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    }
+
+    div {
+        padding: 0 auto !important;
+        margin: 0 auto !important;
+    }
+
+    h4 {
+        color: rgb(0, 123, 255);
+    }
+</style>
+
+<body>
+    <div class="container">
+        <br>
+        <h4 class="text-center">NRR Calculation</h4>
+        <form action="" method="post">
+            <div class="form-group">
+                <label for="supporting_team">Enter the name of the supporting team</label>
+                <input type="text" class="form-control" id="supporting_team" name="supporting_team">
+            </div>
+            <div class="form-group">
+                <label for="against_team">Enter the name of the opposing team</label>
+                <input type="text" class="form-control" id="against_team" name="against_team">
+            </div>
+            <div class="form-group">
+                <label for="runs_scored">Enter the number of runs scored by your team in the tournament</label>
+                <input type="number" step="any" class="form-control" id="runs_scored" name="runs_scored">
+            </div>
+            <div class="form-group">
+                <label for="overs_played">Enter the number of overs played by your team in the tournament</label>
+                <input type="number" step="any" class="form-control" id="overs_played" name="overs_played">
+            </div>
+            <div class="form-group">
+                <label for="runs_scored_against">Enter the number of runs scored against your team in the
+                    tournament</label>
+                <input type="number" step="any" class="form-control" id="runs_scored_against"
+                    name="runs_scored_against">
+            </div>
+            <div class="form-group">
+                <label for="overs_played_against">Enter the number of overs played against your team in the
+                    tournament</label>
+                <input type="number" step="any" class="form-control" id="overs_played_against"
+                    name="overs_played_against">
+            </div>
+            <div class="form-group">
+                <label for="overs">Enter the number of overs which are expected to be played</label>
+                <input type="number" step="any" class="form-control" id="overs" name="overs">
+            </div>
+            <div class="form-group">
+                <label for="final_runs">Enter the number of runs which might be scored in the final</label>
+                <input type="number" step="any" class="form-control" id="final_runs" name="final_runs">
+            </div>
+            <div class="form-group">
+                <label for="required_NRR">Enter the required NRR to qualify for the next round</label>
+                <input type="number" step="any" class="form-control" id="required_NRR" name="required_NRR">
+            </div>
+            <br>
+            <button type="button" class="btn btn-primary" onclick="calculateNRR()">Calculate</button>
+        </form>
+        <br>
+        <div class=" result">
+            <h4 id="result_button" style="visibility: hidden;">Result</h4>
+            <br>
+            <p id="current_nrr"></p>
+            <p id="opponent_batting_first"></p>
+            <p id="your_team_batting_first"></p>
+        </div>
+    </div>
+
+    <script>
+        function calculateNRR() {
+            document.getElementById("result_button").style.visibility = "visible";
+            var supporting_team = document.getElementById("supporting_team").value;
+            var against_team = document.getElementById("against_team").value;
+            var runs_scored = parseFloat(document.getElementById("runs_scored").value);
+            var overs_played = parseFloat(document.getElementById("overs_played").value);
+            overs_played = Math.round(overs_played * 2) / 2;
+            var runs_scored_against = parseFloat(document.getElementById("runs_scored_against").value);
+            var overs_played_against = parseFloat(document.getElementById("overs_played_against").value);
+            var current_NRR = parseFloat(((runs_scored / overs_played) - (runs_scored_against / overs_played_against)).toFixed(3));
+            document.getElementById("current_nrr").innerHTML = "Your team " + supporting_team + "'s current NRR is " + current_NRR;
+
+            var overs = parseFloat(document.getElementById("overs").value);
+            var final_runs = parseInt(document.getElementById("final_runs").value);
+            var required_NRR = parseFloat(document.getElementById("required_NRR").value);
+
+            // Opponent batting first
+            var total_runs_scored = runs_scored + final_runs + 1;
+            var total_runs_scored_against = runs_scored_against + final_runs;
+            var total_overs_played_against = overs_played_against + overs;
+            var final_required_overs = parseFloat(((total_runs_scored / ((total_runs_scored_against / total_overs_played_against) + required_NRR)) - overs_played).toFixed(1));
+            var overs_int = parseInt(final_required_overs);
+            var balls = parseInt((final_required_overs - overs_int) * 6);
+            document.getElementById("opponent_batting_first").innerHTML = "When " + against_team + " is batting first, then " + supporting_team + " needs to chase down " + final_runs + " runs in " + overs_int + " overs and " + balls + " balls.";
+
+            // Your team batting first
+            var first_runs_scored = runs_scored + final_runs;
+            var first_overs_played = overs_played + overs;
+            var first_overs_played_against = overs_played_against + overs;
+            var restricted_runs = parseInt((((first_runs_scored / first_overs_played) - required_NRR) * first_overs_played_against) - runs_scored_against);
+            document.getElementById("your_team_batting_first").innerHTML = "When " + supporting_team + " is batting first, they need to restrict " + against_team + " to " + restricted_runs + " runs.";
+        }
+    </script>
+</body>
+
+</html>
