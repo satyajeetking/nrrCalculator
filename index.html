@@ -4,11 +4,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NRR Calculator</title>
+  <title>NRR Qualification Calculator</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans&display=swap" rel="stylesheet" />
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'IBM Plex Sans', sans-serif;
       background-color: #f8f9fa;
     }
 
@@ -22,13 +24,17 @@
       font-weight: 500;
     }
 
-    .result-card {
-      margin-top: 25px;
+    .required-star {
+      color: red;
     }
 
     .tooltip-inner {
       max-width: 300px;
       text-align: left;
+    }
+
+    .result-card {
+      margin-top: 25px;
     }
   </style>
 </head>
@@ -41,44 +47,56 @@
       </div>
       <div class="card-body">
         <form id="nrrForm">
+          <div class="mb-3">
+            <label class="form-label">Scenario <span class="required-star">*</span></label>
+            <select class="form-select" id="scenario_type" required onchange="toggleOpponentFields()">
+              <option value="vs_each_other">We're playing against the opponent</option>
+              <option value="indirect">We're trying to beat the opponent's NRR (not playing them)</option>
+            </select>
+          </div>
+
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label">Your Team Name <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" title="The team you're supporting or analyzing."></i></label>
+              <label class="form-label">Your Team Name <span class="required-star">*</span></label>
               <input type="text" class="form-control" id="supporting_team" required />
             </div>
             <div class="col-md-6">
-              <label class="form-label">Opposing Team Name <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" title="The team playing against your team."></i></label>
+              <label class="form-label">Opponent Team Name <span class="required-star">*</span></label>
               <input type="text" class="form-control" id="against_team" required />
             </div>
+
             <div class="col-md-6">
-              <label class="form-label">Runs Scored <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" title="Total runs scored by your team so far in the tournament."></i></label>
+              <label class="form-label">Runs Scored <span class="required-star">*</span></label>
               <input type="number" class="form-control" id="runs_scored" required />
             </div>
             <div class="col-md-6">
-              <label class="form-label">Overs Played (e.g., 19.4) <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" title="Overs your team has faced while batting. Enter in X.Y format, where Y ≤ 5."></i></label>
+              <label class="form-label">Overs Played (e.g., 19.4) <span class="required-star">*</span></label>
               <input type="text" class="form-control" id="overs_played" required />
             </div>
             <div class="col-md-6">
-              <label class="form-label">Runs Conceded <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" title="Total runs scored against your team."></i></label>
+              <label class="form-label">Runs Conceded <span class="required-star">*</span></label>
               <input type="number" class="form-control" id="runs_scored_against" required />
             </div>
             <div class="col-md-6">
-              <label class="form-label">Overs Bowled (e.g., 20.0) <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" title="Total overs your team has bowled. Use X.Y format, where Y ≤ 5."></i></label>
+              <label class="form-label">Overs Bowled (e.g., 20.0) <span class="required-star">*</span></label>
               <input type="text" class="form-control" id="overs_played_against" required />
             </div>
+
             <div class="col-md-6">
-              <label class="form-label">Final Match Overs <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" title="Overs expected to be played in the final match. Usually 20 in T20."></i></label>
+              <label class="form-label">Final Match Overs <span class="required-star">*</span></label>
               <input type="text" class="form-control" id="overs" required />
             </div>
             <div class="col-md-6">
-              <label class="form-label">Expected Runs in Final <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" title="Runs expected to be scored in the final match by one team."></i></label>
+              <label class="form-label">Expected Runs in Final <span class="required-star">*</span></label>
               <input type="number" class="form-control" id="final_runs" required />
             </div>
+
             <div class="col-md-6">
-              <label class="form-label">Required NRR <i class="bi bi-info-circle-fill info-icon" data-bs-toggle="tooltip" title="The Net Run Rate your team must reach to qualify."></i></label>
-              <input type="number" class="form-control" id="required_NRR" required />
+              <label class="form-label">Required NRR to Qualify <span class="required-star">*</span></label>
+              <input type="number" step="any" class="form-control" id="required_NRR" required />
             </div>
           </div>
+
           <div class="text-center mt-4">
             <button type="button" class="btn btn-primary px-4" onclick="calculateNRR()">Calculate</button>
           </div>
@@ -98,29 +116,30 @@
     </div>
   </div>
 
-  <!-- Bootstrap Icons and JS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
   <script>
-    // Tooltip init
-    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
-
     function oversToBalls(overs) {
       const parts = overs.split('.');
-      const fullOvers = parseInt(parts[0]);
+      const full = parseInt(parts[0]);
       const balls = parseInt(parts[1]) || 0;
-      if (balls >= 6) return NaN;
-      return (fullOvers * 6) + balls;
+      if (balls > 5 || isNaN(full) || isNaN(balls)) return NaN;
+      return full * 6 + balls;
     }
 
     function ballsToOvers(balls) {
-      const full = Math.floor(balls / 6);
-      const rem = balls % 6;
-      return `${full}.${rem}`;
+      const o = Math.floor(balls / 6);
+      const b = balls % 6;
+      return `${o}.${b}`;
+    }
+
+    function toggleOpponentFields() {
+      const scenario = document.getElementById('scenario_type').value;
+      const opponentField = document.getElementById('against_team');
+      opponentField.disabled = (scenario === 'indirect');
     }
 
     function calculateNRR() {
+      const scenario = document.getElementById('scenario_type').value;
       const errorEl = document.getElementById("error");
       const resultsEl = document.getElementById("results");
       errorEl.classList.add("d-none");
@@ -138,22 +157,37 @@
         const requiredNRR = parseFloat(document.getElementById("required_NRR").value);
 
         if ([oversPlayed, oversAgainst, matchOvers].some(isNaN)) {
-          throw new Error("Invalid overs format. Use X.Y format (e.g., 19.4). Y must be ≤ 5.");
+          throw new Error("Invalid overs format. Use X.Y format (Y must be ≤ 5)");
         }
 
         const currentNRR = ((runsScored / (oversPlayed / 6)) - (runsAgainst / (oversAgainst / 6))).toFixed(3);
         document.getElementById("current_nrr").innerHTML = `✅ Current NRR of <strong>${team}</strong>: <strong>${currentNRR}</strong>`;
 
         const totalScored = runsScored + finalRuns + 1;
-        const totalAgainst = runsAgainst + finalRuns;
+        const totalAgainst = runsAgainst + (scenario === "vs_each_other" ? finalRuns : 0);
         const totalOversAgainst = oversAgainst + matchOvers;
         const finalOversRequired = ((totalScored / ((totalAgainst / (totalOversAgainst / 6)) + requiredNRR)) - (oversPlayed / 6)) * 6;
         const chaseOvers = ballsToOvers(Math.ceil(finalOversRequired));
 
         document.getElementById("opponent_batting_first").innerHTML =
-          `📌 If <strong>${opponent}</strong> bats first, <strong>${team}</strong> must chase <strong>${finalRuns}</strong> in <strong>${chaseOvers}</strong> overs or less.`;
+          `📌 If ${scenario === 'vs_each_other' ? `<strong>${opponent}</strong>` : 'an opponent'} bats first, <strong>${team}</strong> must chase <strong>${finalRuns}</strong> in <strong>${chaseOvers}</strong> overs or less.`;
 
         const newRuns = runsScored + finalRuns;
         const newOvers = oversPlayed + matchOvers;
         const newOversAgainst = oversAgainst + matchOvers;
-        const maxRunsConceded = Math.floor(((new
+        const restrictedRuns = Math.floor((((newRuns / (newOvers / 6)) - requiredNRR) * (newOversAgainst / 6)) - runsAgainst);
+
+        document.getElementById("your_team_batting_first").innerHTML =
+          `📌 If <strong>${team}</strong> bats first, they must restrict ${scenario === 'vs_each_other' ? `<strong>${opponent}</strong>` : 'their opponent'} to under <strong>${restrictedRuns}</strong> runs.`;
+
+        resultsEl.classList.remove("d-none");
+
+      } catch (err) {
+        errorEl.innerText = err.message;
+        errorEl.classList.remove("d-none");
+      }
+    }
+  </script>
+</body>
+
+</html>
